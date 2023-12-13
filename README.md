@@ -1,0 +1,1 @@
+# license__fullstack-smartcontract
