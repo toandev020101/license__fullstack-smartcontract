@@ -5,13 +5,12 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 
 const ClientLayout = ({ children }) => {
-  const widthDrawer = '260px';
   return (
     <>
-      <Box minHeight="100vh" sx={{ backgroundColor: '#f9f9f9' }}>
-        <Sidebar width={widthDrawer} />
+      <Box minHeight="100vh" bgcolor={'#f5f5f5'} display={'flex'}>
+        <Sidebar />
 
-        <Box paddingLeft={widthDrawer}>
+        <Box width={'100%'}>
           <Header />
 
           {/* content */}

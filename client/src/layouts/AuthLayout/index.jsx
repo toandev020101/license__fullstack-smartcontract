@@ -9,9 +9,10 @@ const AuthLayout = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state) {
-      const { toastError } = location.state;
-      toast.error(toastError.message, toastError.options);
+    if (location.state && location.state.notify) {
+      const { notify } = location.state;
+      toast[notify.type](notify.message, notify.options);
+      delete location.state.notify;
     }
   }, [location]);
 
