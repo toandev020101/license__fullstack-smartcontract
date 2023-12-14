@@ -1,10 +1,9 @@
-import { Box, Button, Grid, Typography, useTheme } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import TitlePage from './TitlePage';
 
 const Error = ({ type }) => {
-  const theme = useTheme();
   const errors = {
     401: {
       title: 'Không có quyền truy cập',
@@ -40,8 +39,8 @@ const Error = ({ type }) => {
         sx={{
           width: '100vw',
           height: '100vh',
-          bgcolor: theme.palette.common.white,
-          color: theme.palette.primary.main,
+          bgcolor: '#fff',
+          color: '#782CFF',
           position: 'absolute',
           top: 0,
           left: 0,
@@ -62,7 +61,14 @@ const Error = ({ type }) => {
               <Link to="/">
                 <Button
                   variant="contained"
-                  sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary.main }}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: '#782CFF',
+                    '&:hover': {
+                      color: '#fff',
+                      bgcolor: '#782CFF',
+                    },
+                  }}
                 >
                   Trang chủ
                 </Button>
@@ -70,7 +76,14 @@ const Error = ({ type }) => {
               <Link to="tel:+84924212027">
                 <Button
                   variant="contained"
-                  sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary.main }}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: '#782CFF',
+                    '&:hover': {
+                      color: '#fff',
+                      bgcolor: '#782CFF',
+                    },
+                  }}
                 >
                   Gọi hỗ trợ miễn phí
                 </Button>
