@@ -28,7 +28,7 @@ class AuthController {
   logout = async (req, res, next) => {
     new OK({
       message: 'Logout OK!',
-      metadata: await AuthService.logout({ id: req.userId }),
+      metadata: await AuthService.logout({ id: req.userId }, res),
     }).send(res);
   };
 }

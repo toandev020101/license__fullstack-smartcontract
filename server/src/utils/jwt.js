@@ -19,7 +19,17 @@ const sendRefreshToken = (res, user) => {
   });
 };
 
+const clearRefreshToken = (res) => {
+  res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/v1/api/refresh-token',
+  });
+};
+
 module.exports = {
   createToken,
   sendRefreshToken,
+  clearRefreshToken,
 };

@@ -15,7 +15,7 @@ export const refreshToken = () => {
   return axiosClient.get(url);
 };
 
-export const logout = (id) => {
-  const url = `/logout/${id}`;
+export const logout = () => {
+  const url = '/logout';
   return axiosClient.get(url);
 };
