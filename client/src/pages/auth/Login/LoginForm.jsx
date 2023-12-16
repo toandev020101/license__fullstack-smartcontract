@@ -69,6 +69,7 @@ const LoginForm = () => {
         loadingIndicator="Loading…"
         type="submit"
         fullWidth
+        disabled={isLoading}
         sx={{
           backgroundColor: '#782CFF',
           color: '#fff',

@@ -168,6 +168,7 @@ const Header = () => {
                 loading={isConnectLoading}
                 loadingPosition="start"
                 startIcon={<BiWallet />}
+                disabled={isLoading}
                 sx={{
                   textTransform: 'none',
                   borderColor: '#782CFF',

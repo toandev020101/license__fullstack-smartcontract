@@ -11,7 +11,7 @@ router.get('/:id', asyncHandler(userController.getOneById));
 router.post('', asyncHandler(userController.addOne));
 
 // authentication
-// router.use(auth);
+router.use(auth);
 router.put('', upload.single('file'), asyncHandler(userController.updateOne));
 
 module.exports = router;
