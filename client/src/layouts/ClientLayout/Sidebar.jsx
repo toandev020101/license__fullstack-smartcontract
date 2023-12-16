@@ -3,7 +3,7 @@ import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } fro
 import { TbLicense } from 'react-icons/tb';
 import { RiHistoryFill } from 'react-icons/ri';
 import { Link, useLocation } from 'react-router-dom';
-import { BiSolidImage } from 'react-icons/bi';
+import { BiSolidImage, BiUser } from 'react-icons/bi';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -15,9 +15,14 @@ const Sidebar = () => {
       icon: <TbLicense />,
     },
     {
-      slug: '/lich-su-giao-dich',
-      name: 'Lịch sử giao dịch',
+      slug: '/lich-su-hoat-dong',
+      name: 'Lịch sử hoạt động',
       icon: <RiHistoryFill />,
+    },
+    {
+      slug: '/tai-khoan/ho-so',
+      name: 'Thông tin tài khoản',
+      icon: <BiUser />,
     },
   ];
 
