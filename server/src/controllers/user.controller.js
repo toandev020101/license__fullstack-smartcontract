@@ -9,6 +9,13 @@ class UserController {
       metadata: await UserService.getOneById(req.params),
     }).send(res);
   };
+
+  updateOne = async (req, res, nex) => {
+    new OK({
+      message: 'Update User OK!',
+      metadata: await UserService.updateOne({ id: req.userId, file: req.file, ...req.body }),
+    }).send(res);
+  };
 }
 
 module.exports = new UserController();
