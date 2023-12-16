@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const app = express();
 
 // init database
@@ -19,7 +20,9 @@ app.use(compression()); // reduce bandwidth
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
-app.use(express.static('./uploads'));
+
+const staticDir = path.join(__dirname, '../uploads');
+app.use(express.static(staticDir));
 
 //init routes
 app.use('', require('./routes'));

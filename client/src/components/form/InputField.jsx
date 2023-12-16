@@ -5,7 +5,7 @@ import { BiHide, BiShowAlt } from 'react-icons/bi';
 
 const InputField = (props) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { form, name, label, required, type, ...others } = props;
+  const { form, name, label, required, type, fix, ...others } = props;
 
   return (
     <Controller
@@ -58,7 +58,11 @@ const InputField = (props) => {
               aria-label="showPassword"
               onClick={() => setShowPassword(!showPassword)}
               edge="end"
-              sx={{ position: 'absolute', top: '13%', right: '20px' }}
+              sx={
+                fix
+                  ? { position: 'absolute', top: '0', right: '20px' }
+                  : { position: 'absolute', top: '13%', right: '20px' }
+              }
             >
               {showPassword ? <BiShowAlt /> : <BiHide />}
             </IconButton>
