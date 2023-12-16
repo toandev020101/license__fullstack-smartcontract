@@ -175,7 +175,13 @@ const Profile = () => {
             loadingIndicator={'Loading...'}
             variant="contained"
             type="submit"
-            sx={{ textTransform: 'capitalize', marginTop: '20px' }}
+            sx={{
+              textTransform: 'capitalize',
+              marginTop: '20px',
+              bgcolor: '#782CFF',
+              color: '#fff',
+              '&:hover': { bgcolor: '#782CFF', color: '#fff' },
+            }}
             disabled={isLoading}
           >
             Lưu lại
