@@ -1,3 +1,4 @@
+import { yupResolver } from '@hookform/resolvers/yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {
   AppBar,
@@ -16,18 +17,17 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { BiLockAlt, BiLogOut, BiUser, BiWallet } from 'react-icons/bi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import * as yup from 'yup';
 import * as AuthApi from '../../apis/authApi';
 import * as UserApi from '../../apis/userApi';
 import LoadingPage from '../../components/LoadingPage';
+import InputField from '../../components/form/InputField';
 import JWTManager from '../../utils/jwt';
 import Web3Api from '../../web3Api';
-import { useForm } from 'react-hook-form';
-import * as yup from 'yup';
-import InputField from '../../components/form/InputField';
-import { yupResolver } from '@hookform/resolvers/yup';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -54,7 +54,10 @@ const Header = () => {
     if (location.state && location.state.notify) {
       const { notify } = location.state;
       toast[notify.type](notify.message, notify.options);
-      delete location.state.notify;
+
+      const newLocationState = { ...location.state };
+      delete newLocationState.notify;
+      location.state = newLocationState;
     }
   }, [location]);
 
@@ -64,7 +67,6 @@ const Header = () => {
       const res = await UserApi.getOneById(userId);
       const user = res.metadata.user;
       setUser(user);
-      toast.success('Xin chào, ' + user.fullName, { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
     };
 
     const isLogin = async () => {
@@ -289,16 +291,6 @@ const Header = () => {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <MenuItem onClick={handleClose}>
-                  <Link
-                    to="/tai-khoan/ho-so"
-                    style={{ textDecoration: 'none', color: '#333', display: 'flex', alignItems: 'center' }}
-                  >
-                    <BiUser fontSize="20px" style={{ marginRight: '10px' }} />
-                    <Typography>Thông tin tài khoản</Typography>
-                  </Link>
-                </MenuItem>
-
                 <MenuItem
                   onClick={() => {
                     handleOpenChangePasswordDialog();

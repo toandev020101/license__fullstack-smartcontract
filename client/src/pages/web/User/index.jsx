@@ -198,7 +198,7 @@ const Profile = () => {
           gap={'15px'}
           sx={{ marginLeft: '30px', paddingLeft: '30px', borderLeft: '1px solid #e0e0e0', width: '800px' }}
         >
-          <Avatar sx={{ width: '130px', height: '130px' }} alt="" src={avatar} />
+          <Avatar key={avatar} sx={{ width: '130px', height: '130px' }} alt="" src={avatar} />
           <Button component="label" variant="outlined" sx={{ textTransform: 'capitalize' }}>
             Chọn ảnh
             <VisuallyHiddenInput type="file" accept=".jpg, .png" onChange={handleFileChange} />
