@@ -1,8 +1,12 @@
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
   AppBar,
   Avatar,
   Box,
   Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Divider,
   IconButton,
   Menu,
@@ -12,15 +16,18 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import JWTManager from '../../utils/jwt';
-import { ToastContainer, toast } from 'react-toastify';
-import * as UserApi from '../../apis/userApi';
 import { BiLockAlt, BiLogOut, BiUser, BiWallet } from 'react-icons/bi';
-import LoadingButton from '@mui/lab/LoadingButton';
-import LoadingPage from '../../components/LoadingPage';
-import Web3Api from '../../web3Api';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 import * as AuthApi from '../../apis/authApi';
+import * as UserApi from '../../apis/userApi';
+import LoadingPage from '../../components/LoadingPage';
+import JWTManager from '../../utils/jwt';
+import Web3Api from '../../web3Api';
+import { useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import InputField from '../../components/form/InputField';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -29,6 +36,8 @@ const Header = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnectLoading, setIsConnectLoading] = useState(false);
   const [account, setAccount] = useState(null);
+  const [openChangePasswordDialog, setOpenChangePasswordDialog] = useState(false);
+  const [isChangePasswordLoading, setIsChangePasswordLoading] = useState(false);
 
   // menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -134,6 +143,49 @@ const Header = () => {
       }
       setIsLoading(false);
     }
+  };
+
+  const handleOpenChangePasswordDialog = () => {
+    setOpenChangePasswordDialog(true);
+  };
+
+  const handleCloseChangePasswordDialog = () => {
+    setOpenChangePasswordDialog(false);
+  };
+
+  const schema = yup.object().shape({
+    password: yup.string().required('Vui lòng nhập mật khẩu cũ !'),
+    newPassword: yup.string().required('Vui lòng nhập mật khẩu mới !'),
+    confirmNewPassword: yup
+      .string()
+      .required('Vui lòng nhập xác nhận mật khẩu mới !')
+      .oneOf([yup.ref('newPassword')], 'Không khớp mật khẩu!'),
+  });
+
+  const form = useForm({
+    defaultValues: {
+      password: '',
+      newPassword: '',
+      confirmNewPassword: '',
+    },
+    resolver: yupResolver(schema),
+  });
+
+  const handleChangePasswordSubmit = async (values) => {
+    setIsChangePasswordLoading(true);
+    try {
+      await UserApi.changePassword(values);
+      toast.success('Cập nhật mật khâu thành công!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+    } catch (error) {
+      const { data } = error.response;
+      if (data.code === 400 || data.code === 404) {
+        toast.error(data.message, { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      } else {
+        navigate(`/error/${data.code}`);
+      }
+    }
+    setIsChangePasswordLoading(false);
+    handleCloseChangePasswordDialog();
   };
 
   return (
@@ -242,17 +294,21 @@ const Header = () => {
                     to="/tai-khoan/ho-so"
                     style={{ textDecoration: 'none', color: '#333', display: 'flex', alignItems: 'center' }}
                   >
-                    <BiUser fontSize="20px" style={{ marginRight: '10px' }} /> Thông tin tài khoản
+                    <BiUser fontSize="20px" style={{ marginRight: '10px' }} />
+                    <Typography>Thông tin tài khoản</Typography>
                   </Link>
                 </MenuItem>
 
-                <MenuItem onClick={handleClose}>
-                  <Link
-                    to="/tai-khoan/thay-doi-mat-khau"
-                    style={{ textDecoration: 'none', color: '#333', display: 'flex', alignItems: 'center' }}
-                  >
-                    <BiLockAlt fontSize="20px" style={{ marginRight: '10px' }} /> Thay đổi mật khẩu
-                  </Link>
+                <MenuItem
+                  onClick={() => {
+                    handleOpenChangePasswordDialog();
+                    handleClose();
+                  }}
+                >
+                  <Box style={{ display: 'flex', alignItems: 'center' }}>
+                    <BiLockAlt fontSize="20px" style={{ marginRight: '10px' }} />
+                    <Typography>Thay đổi mật khẩu</Typography>
+                  </Box>
                 </MenuItem>
 
                 <Divider />
@@ -264,6 +320,65 @@ const Header = () => {
               {/* avatar */}
             </Box>
           )}
+
+          <Dialog
+            open={openChangePasswordDialog}
+            onClose={handleCloseChangePasswordDialog}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Thay đổi mật khẩu</DialogTitle>
+            <DialogContent sx={{ width: '500px' }}>
+              {/* Form */}
+              <Box
+                component={'form'}
+                onSubmit={form.handleSubmit(handleChangePasswordSubmit)}
+                width={'100%'}
+                marginTop={'10px'}
+              >
+                <InputField name="password" label="Mật khẩu cũ" size={'small'} type={'password'} form={form} fix />
+                <InputField name="newPassword" label="Mật khẩu mới" size={'small'} type={'password'} form={form} fix />
+                <InputField
+                  name="confirmNewPassword"
+                  label="Xác nhận mật khẩu mới"
+                  size={'small'}
+                  type={'password'}
+                  form={form}
+                  fix
+                />
+
+                <Box display={'flex'} justifyContent={'flex-end'} alignItems={'center'} gap={'10px'} marginTop={'20px'}>
+                  <LoadingButton
+                    loading={isChangePasswordLoading}
+                    loadingIndicator={'Loading...'}
+                    variant="contained"
+                    type="submit"
+                    sx={{
+                      textTransform: 'capitalize',
+                      bgcolor: '#782CFF',
+                      color: '#fff',
+                      '&:hover': { bgcolor: '#782CFF', color: '#fff' },
+                    }}
+                    disabled={isChangePasswordLoading}
+                  >
+                    Xác nhận
+                  </LoadingButton>
+
+                  <Button
+                    variant={'contained'}
+                    color={'error'}
+                    onClick={handleCloseChangePasswordDialog}
+                    sx={{
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    Huỷ
+                  </Button>
+                </Box>
+              </Box>
+              {/* Form */}
+            </DialogContent>
+          </Dialog>
         </Toolbar>
       </AppBar>
     </Box>

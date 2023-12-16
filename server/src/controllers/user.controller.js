@@ -16,6 +16,13 @@ class UserController {
       metadata: await UserService.updateOne({ id: req.userId, file: req.file, ...req.body }),
     }).send(res);
   };
+
+  changePassword = async (req, res, nex) => {
+    new OK({
+      message: 'Change password User OK!',
+      metadata: await UserService.changePassword({ id: req.userId, ...req.body }),
+    }).send(res);
+  };
 }
 
 module.exports = new UserController();
