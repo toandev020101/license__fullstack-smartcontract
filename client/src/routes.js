@@ -1,6 +1,6 @@
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import Home from './pages/web/Home';
+import LicenseManager from './pages/web/LicenseManager';
 import AuthLayout from './layouts/AuthLayout';
 import Profile from './pages/web/User';
 
@@ -11,5 +11,5 @@ export const publicRoutes = [
 
 export const privateRoutes = [
   { path: '/tai-khoan/ho-so', component: Profile },
-  { path: '/', component: Home },
+  { path: '/', component: LicenseManager },
 ];
