@@ -12,7 +12,10 @@ const AuthLayout = ({ children }) => {
     if (location.state && location.state.notify) {
       const { notify } = location.state;
       toast[notify.type](notify.message, notify.options);
-      delete location.state.notify;
+
+      const newLocationState = { ...location.state };
+      delete newLocationState.notify;
+      location.state = newLocationState;
     }
   }, [location]);
 
