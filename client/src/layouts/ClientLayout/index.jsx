@@ -8,7 +8,7 @@ const ClientLayout = ({ children }) => {
   const widthDrawer = '260px';
   return (
     <>
-      <Box minHeight="100vh" sx={{ backgroundColor: '#f9f9f9' }}>
+      <Box minHeight="100vh" sx={{ backgroundColor: '#f0f0f0' }}>
         <Sidebar width={widthDrawer} />
 
         <Box paddingLeft={widthDrawer}>

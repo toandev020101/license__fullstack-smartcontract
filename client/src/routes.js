@@ -1,6 +1,6 @@
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import Home from './pages/web/Home';
+import LicenseManager from './pages/web/LicenseManager';
 import AuthLayout from './layouts/AuthLayout';
 
 export const publicRoutes = [
@@ -8,4 +8,4 @@ export const publicRoutes = [
   { path: '/dang-ky', component: Register, layout: AuthLayout },
 ];
 
-export const privateRoutes = [{ path: '/', component: Home }];
+export const privateRoutes = [{ path: '/', component: LicenseManager }];
