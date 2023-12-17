@@ -3,6 +3,7 @@ import React from 'react';
 import { BiSolidImage } from 'react-icons/bi';
 import LoginForm from './LoginForm';
 import { Link } from 'react-router-dom';
+import TitlePage from '../../../components/TitlePage';
 
 const Login = () => {
   return (
@@ -16,6 +17,7 @@ const Login = () => {
       width={'430px'}
       zIndex={99}
     >
+      <TitlePage title="ArtChain - Đăng nhập" />
       <Box display={'flex'} justifyContent={'center'} alignItems={'center'} gap={'10px'} marginBottom={'20px'}>
         <BiSolidImage style={{ fontSize: '40px', color: '#782CFF' }} />
         <Typography variant="h5" sx={{ fontWeight: 600, textTransform: 'uppercase', color: '#444' }}>

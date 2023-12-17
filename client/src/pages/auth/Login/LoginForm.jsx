@@ -39,7 +39,8 @@ const LoginForm = () => {
       JWTManager.setToken(res.metadata.accessToken);
       navigate('/', {
         state: {
-          toastSuccess: {
+          toast: {
+            type: 'success',
             message: 'Xin chào, ' + user.fullName,
             options: { theme: 'colored', toastId: 'headerId', autoClose: 1500 },
           },
@@ -51,8 +52,8 @@ const LoginForm = () => {
       const { data } = error.response;
       if (data.code === 400 || data.code === 404) {
         toast.error(data.message, { theme: 'colored', toastId: 'loginId', autoClose: 1500 });
-      } else if (data.code === 500) {
-        navigate('/error/500');
+      } else {
+        navigate(`/error/${data.code}`);
       }
       setIsLoading(false);
     }
@@ -68,6 +69,7 @@ const LoginForm = () => {
         loadingIndicator="Loading…"
         type="submit"
         fullWidth
+        disabled={isLoading}
         sx={{
           backgroundColor: '#782CFF',
           color: '#fff',

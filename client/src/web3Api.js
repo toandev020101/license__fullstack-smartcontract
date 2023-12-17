@@ -14,20 +14,6 @@ class Web3Api {
     }
   }
 
-  async sign({ publicAddress, nonce }) {
-    try {
-      const signature = await window.ethereum.request({
-        method: 'personal_sign',
-        params: [this.web3Instance.utils.utf8ToHex(`Tôi đang ký một lần nonce của mình: ${nonce}`), publicAddress],
-      });
-
-      return signature;
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
-  }
-
   static getInstance() {
     if (!Web3Api.instance) {
       Web3Api.instance = new Web3Api();

@@ -2,7 +2,7 @@
 const db = require('../models');
 const bcrypt = require('bcrypt');
 const { BadRequestError, AuthFailureError } = require('../core/error.response');
-const { sendRefreshToken, createToken } = require('../utils/jwt');
+const { sendRefreshToken, createToken, clearRefreshToken } = require('../utils/jwt');
 const { verify } = require('jsonwebtoken');
 
 class AuthService {
@@ -87,7 +87,7 @@ class AuthService {
     };
   };
 
-  static logout = async ({ id }) => {
+  static logout = async ({ id }, res) => {
     // step 1: check username exists ?
     let findUser = await db.User.findByPk(id);
     if (!findUser) {
@@ -99,14 +99,10 @@ class AuthService {
     // step 2: logout
     await db.User.update({ tokenVersion: findUser.tokenVersion + 1 }, { where: { id } });
 
-    res.clearCookie(process.env.REFRESH_TOKEN_COOKIE_NAME, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/v1/api/refresh-token',
-    });
+    // step 3: clear
+    clearRefreshToken(res);
 
-    return;
+    return null;
   };
 }
 
