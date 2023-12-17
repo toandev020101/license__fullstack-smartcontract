@@ -116,7 +116,10 @@ const LicenseManager = () => {
     } else if (selectedIndex === selectedArr.length - 1) {
       newSelectedArr = newSelectedArr.concat(selectedArr.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelectedArr = newSelectedArr.concat(selectedArr.slice(0, selectedIndex), selectedArr.slice(selectedIndex + 1));
+      newSelectedArr = newSelectedArr.concat(
+        selectedArr.slice(0, selectedIndex),
+        selectedArr.slice(selectedIndex + 1),
+      );
     }
     setSelectedArr(newSelectedArr);
   };
@@ -405,7 +408,11 @@ const LicenseManager = () => {
 
                   {rows.length === 0 && (
                     <TableRow style={{ height: 53 }}>
-                      <TableCell colSpan={headCells.length + 1} align="center" sx={{ fontSize: '14px' }}>
+                      <TableCell
+                        colSpan={headCells.length + 1}
+                        align="center"
+                        sx={{ fontSize: '14px' }}
+                      >
                         Không có bản quyền nào!
                       </TableCell>
                     </TableRow>
