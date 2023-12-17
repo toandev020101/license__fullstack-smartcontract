@@ -6,21 +6,19 @@ import Sidebar from './Sidebar';
 
 const ClientLayout = ({ children }) => {
   return (
-    <>
-      <Box minHeight="100vh" bgcolor={'#f5f5f5'} display={'flex'}>
-        <Sidebar />
+    <Box minHeight="100vh" bgcolor={'#f5f5f5'} display={'flex'}>
+      <Sidebar />
 
-        <Box width={'100%'}>
-          <Header />
+      <Box width={'100%'}>
+        <Header />
 
-          {/* content */}
-          <Box padding="20px 20px 40px">{children}</Box>
-          {/* content */}
+        {/* content */}
+        <Box padding="20px 20px 40px">{children}</Box>
+        {/* content */}
 
-          <Footer />
-        </Box>
+        <Footer />
       </Box>
-    </>
+    </Box>
   );
 };
 
