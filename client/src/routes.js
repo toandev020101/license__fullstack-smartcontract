@@ -13,3 +13,4 @@ export const privateRoutes = [
   { path: '/tai-khoan/ho-so', component: Profile },
   { path: '/', component: LicenseManager },
 ];
+

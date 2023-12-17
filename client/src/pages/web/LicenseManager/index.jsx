@@ -51,7 +51,6 @@ const LicenseManager = () => {
   const [searchTerm, setSearchTerm] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-
   const headCells = [
     // các thành phần trên header
     {
@@ -438,7 +437,6 @@ const LicenseManager = () => {
             </TableFooter>
           </Table>
         </TableContainer>
-
         <Dialog
           open={openDeleteDialog}
           onClose={handleDeleteDialogClose}
