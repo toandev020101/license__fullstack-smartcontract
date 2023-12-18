@@ -1,4 +1,5 @@
 'use strict';
+const { BadRequestError } = require('../core/error.response');
 const db = require('../models');
 const { Op } = require('sequelize');
 
@@ -30,6 +31,32 @@ class LicenseService {
     const total = await db.License.count();
 
     return { licenses, total };
+  };
+
+  static removeOne = async ({ id }) => {
+    const delCount = await db.License.destroy({
+      where: {
+        id,
+      },
+      force: true,
+    });
+    if (delCount === 0) {
+      throw new BadRequestError('Bản quyền không tồn tại!');
+    }
+    return true;
+  };
+
+  static removeAny = async ({ ids }) => {
+    const delCount = await db.License.destroy({
+      where: {
+        id: ids,
+      },
+      force: true,
+    });
+    if (delCount === 0) {
+      throw new BadRequestError('Bản quyền không tồn tại!');
+    }
+    return true;
   };
 }
 

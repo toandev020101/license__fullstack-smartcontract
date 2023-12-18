@@ -25,7 +25,17 @@ contract contractApi{
         return licenseArr;
     }
 
-    function createLicense(uint256 _id, string memory _hash) public{
+    function createLicense(uint256 _id, string memory _hash) public {
         licenses[_id] = License(_id, _hash);
+    }
+
+    function removeLicense(uint256 _id) public {
+        delete licenses[_id];
+    }
+
+    function removeLicenses(uint256[] memory _ids) public {
+        for(uint256 i; i < _ids.length; i++){
+            delete licenses[_ids[i]];
+        }
     }
 }

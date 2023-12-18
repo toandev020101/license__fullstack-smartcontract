@@ -158,7 +158,10 @@ const LicenseManager = () => {
     } else if (selectedIndex === selectedArr.length - 1) {
       newSelectedArr = newSelectedArr.concat(selectedArr.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelectedArr = newSelectedArr.concat(selectedArr.slice(0, selectedIndex), selectedArr.slice(selectedIndex + 1));
+      newSelectedArr = newSelectedArr.concat(
+        selectedArr.slice(0, selectedIndex),
+        selectedArr.slice(selectedIndex + 1),
+      );
     }
     setSelectedArr(newSelectedArr);
   };
@@ -183,7 +186,51 @@ const LicenseManager = () => {
     setOpenDeleteDialog(true);
   };
 
-  const handleDeleteRow = async () => {};
+  const handleDeleteRow = async () => {
+    setIsDeleteLoading(true);
+    try {
+      if (deleteRowIndex === -1) {
+        const success = await LicenseApi.removeAny({ ids: selectedArr });
+        if (success) {
+          const newWeb3Api = await Web3Api.getInstance();
+          if (newWeb3Api.contractInstance) {
+            const accounts = await newWeb3Api.web3Instance.eth.getAccounts();
+            await newWeb3Api.contractInstance.methods
+              .removeLicenses(selectedArr)
+              .send({ from: accounts[0] });
+          }
+        }
+      } else {
+        const success = await LicenseApi.removeOne(rows[deleteRowIndex].id);
+        if (success) {
+          const newWeb3Api = await Web3Api.getInstance();
+          if (newWeb3Api.contractInstance) {
+            const accounts = await newWeb3Api.web3Instance.eth.getAccounts();
+            await newWeb3Api.contractInstance.methods
+              .removeLicense(rows[deleteRowIndex].id)
+              .send({ from: accounts[0] });
+          }
+        }
+      }
+
+      toast.success('Xoá bản quyền thành công!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
+
+      setReload(!reload);
+      setSelectedArr([]);
+    } catch (error) {
+      const { data } = error.response;
+      if (data.code === 400 || data.code === 404) {
+        toast.error(data.message, { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      } else if (data.code === 500) {
+        navigate('/error/500');
+      }
+    }
+    setIsDeleteLoading(false);
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -457,7 +504,11 @@ const LicenseManager = () => {
 
                   {rows.length === 0 && (
                     <TableRow style={{ height: 53 }}>
-                      <TableCell colSpan={headCells.length + 1} align="center" sx={{ fontSize: '14px' }}>
+                      <TableCell
+                        colSpan={headCells.length + 1}
+                        align="center"
+                        sx={{ fontSize: '14px' }}
+                      >
                         Không có bản quyền nào!
                       </TableCell>
                     </TableRow>
