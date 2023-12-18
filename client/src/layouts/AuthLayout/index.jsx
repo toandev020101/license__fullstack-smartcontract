@@ -1,12 +1,14 @@
 import { Box } from '@mui/material';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import JWTManager from '../../utils/jwt';
 import { ToastContainer, toast } from 'react-toastify';
+import { AuthContext } from '../../contexts/authContext';
 
 const AuthLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isLogined, _setIsLogined } = useContext(AuthContext);
 
   useEffect(() => {
     if (location.state && location.state.notify) {
@@ -20,24 +22,10 @@ const AuthLayout = ({ children }) => {
   }, [location]);
 
   useEffect(() => {
-    const isLogin = async () => {
-      try {
-        const token = JWTManager.getToken();
-        if (token) {
-          navigate('/');
-        }
-      } catch (error) {
-        const { data } = error.response;
-        if (data.code === 400 || data.code === 404) {
-          toast.error(data.message, { theme: 'colored', toastId: 'authId', autoClose: 1500 });
-        } else if (data.code === 500) {
-          navigate('/error/500');
-        }
-      }
-    };
-
-    isLogin();
-  }, [navigate]);
+    if (isLogined) {
+      navigate('/');
+    }
+  }, [navigate, isLogined]);
 
   return (
     <Box position={'relative'}>
