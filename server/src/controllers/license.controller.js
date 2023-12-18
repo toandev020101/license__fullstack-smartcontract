@@ -9,7 +9,6 @@ class LicenseController {
       metadata: await LicenseService.getPagination({ createdBy: req.userId, ...req.query }),
     }).send(res);
   };
-
   removeOne = async (req, res, next) => {
     new OK({
       message: 'Delete license OK!',
