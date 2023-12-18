@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasMany(models.License, { foreignKey: 'createdBy', as: 'licenseData' });
     }
   }
   User.init(

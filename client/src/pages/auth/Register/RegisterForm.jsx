@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Box } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useForm } from 'react-hook-form';
@@ -9,10 +9,12 @@ import { useNavigate } from 'react-router-dom';
 import * as AuthApi from '../../../apis/authApi';
 import JWTManager from '../../../utils/jwt';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../../contexts/authContext';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { _isLogined, setIsLogined } = useContext(AuthContext);
 
   const schema = yup.object().shape({
     fullName: yup.string().required('Vui lòng nhập họ và tên !'),
@@ -45,6 +47,7 @@ const RegisterForm = () => {
 
       const user = res.metadata.user;
       JWTManager.setToken(res.metadata.accessToken);
+      setIsLogined(true);
       navigate('/', {
         state: {
           notify: {
