@@ -1,12 +1,36 @@
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { Fragment } from 'react';
+import { Fragment, useContext, useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Error from './components/Error';
 import ClientLayout from './layouts/ClientLayout';
 import { privateRoutes, publicRoutes } from './routes';
+import JWTManager from './utils/jwt';
+import { AuthContext } from './contexts/authContext';
 
 const App = () => {
   const theme = createTheme();
+  const { _isLogined, setIsLogined } = useContext(AuthContext);
+
+  useEffect(() => {
+    const isLogin = async () => {
+      try {
+        const token = JWTManager.getToken();
+        if (!token) {
+          const success = await JWTManager.getRefreshToken();
+          setIsLogined(success);
+        } else {
+          setIsLogined(true);
+        }
+      } catch (error) {
+        const { data } = error.response;
+        console.error(data);
+        setIsLogined(false);
+      }
+    };
+
+    isLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="App">

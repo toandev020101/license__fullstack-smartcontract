@@ -16,10 +16,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { BiLockAlt, BiLogOut, BiUser, BiWallet } from 'react-icons/bi';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { BiLockAlt, BiLogOut, BiWallet } from 'react-icons/bi';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import * as yup from 'yup';
 import * as AuthApi from '../../apis/authApi';
@@ -28,6 +28,8 @@ import LoadingPage from '../../components/LoadingPage';
 import InputField from '../../components/form/InputField';
 import JWTManager from '../../utils/jwt';
 import Web3Api from '../../web3Api';
+import { AuthContext } from '../../contexts/authContext';
+import { WalletContext } from '../../contexts/walletContext';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -38,6 +40,9 @@ const Header = () => {
   const [account, setAccount] = useState(null);
   const [openChangePasswordDialog, setOpenChangePasswordDialog] = useState(false);
   const [isChangePasswordLoading, setIsChangePasswordLoading] = useState(false);
+
+  const { isLogined, setIsLogined } = useContext(AuthContext);
+  const { _isConnected, setIsConnected } = useContext(WalletContext);
 
   // menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -62,34 +67,12 @@ const Header = () => {
   }, [location]);
 
   useEffect(() => {
-    const loginSuccess = async () => {
-      const userId = JWTManager.getUserId();
-      const res = await UserApi.getOneById(userId);
-      const user = res.metadata.user;
-      setUser(user);
-    };
-
-    const isLogin = async () => {
+    const getUser = async () => {
       try {
-        const token = JWTManager.getToken();
-        if (token) {
-          loginSuccess();
-        } else {
-          const success = await JWTManager.getRefreshToken();
-          if (success) {
-            loginSuccess();
-          } else {
-            navigate('/dang-nhap', {
-              state: {
-                notify: {
-                  type: 'error',
-                  message: 'Vui lòng đăng nhập !',
-                  options: { theme: 'colored', toastId: 'loginId', autoClose: 1500 },
-                },
-              },
-            });
-          }
-        }
+        const userId = JWTManager.getUserId();
+        const res = await UserApi.getOneById(userId);
+        const user = res.metadata.user;
+        setUser(user);
       } catch (error) {
         const { data } = error.response;
         if (data.code === 400 || data.code === 404) {
@@ -100,8 +83,26 @@ const Header = () => {
       }
     };
 
-    isLogin();
-  }, [navigate]);
+    let timeoutId;
+    if (isLogined) {
+      clearTimeout(timeoutId);
+      getUser();
+    } else {
+      timeoutId = setTimeout(
+        () =>
+          navigate('/dang-nhap', {
+            state: {
+              notify: {
+                type: 'error',
+                message: 'Vui lòng đăng nhập !',
+                options: { theme: 'colored', toastId: 'loginId', autoClose: 1500 },
+              },
+            },
+          }),
+        1000,
+      );
+    }
+  }, [navigate, isLogined]);
 
   const handleConnectWallet = async () => {
     setIsConnectLoading(true);
@@ -109,10 +110,16 @@ const Header = () => {
     const newWeb3Api = await Web3Api.getInstance();
     let isConnect = await newWeb3Api.connect();
     if (!isConnect) {
-      toast.error('Kết nối metamask thất bại!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      toast.error('Kết nối metamask thất bại!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
       setIsConnectLoading(false);
+      setIsConnected(false);
       return;
     }
+    setIsConnected(true);
 
     // Lấy tài khoản hiện tại
     const accounts = await newWeb3Api.web3Instance.eth.getAccounts();
@@ -127,6 +134,7 @@ const Header = () => {
     try {
       await AuthApi.logout();
       JWTManager.deleteToken();
+      setIsLogined(false);
       navigate('/dang-nhap', {
         state: {
           notify: {
@@ -177,7 +185,11 @@ const Header = () => {
     setIsChangePasswordLoading(true);
     try {
       await UserApi.changePassword(values);
-      toast.success('Cập nhật mật khâu thành công!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      toast.success('Cập nhật mật khâu thành công!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
     } catch (error) {
       const { data } = error.response;
       if (data.code === 400 || data.code === 404) {
@@ -328,8 +340,22 @@ const Header = () => {
                 width={'100%'}
                 marginTop={'10px'}
               >
-                <InputField name="password" label="Mật khẩu cũ" size={'small'} type={'password'} form={form} fix />
-                <InputField name="newPassword" label="Mật khẩu mới" size={'small'} type={'password'} form={form} fix />
+                <InputField
+                  name="password"
+                  label="Mật khẩu cũ"
+                  size={'small'}
+                  type={'password'}
+                  form={form}
+                  fix
+                />
+                <InputField
+                  name="newPassword"
+                  label="Mật khẩu mới"
+                  size={'small'}
+                  type={'password'}
+                  form={form}
+                  fix
+                />
                 <InputField
                   name="confirmNewPassword"
                   label="Xác nhận mật khẩu mới"
@@ -339,7 +365,13 @@ const Header = () => {
                   fix
                 />
 
-                <Box display={'flex'} justifyContent={'flex-end'} alignItems={'center'} gap={'10px'} marginTop={'20px'}>
+                <Box
+                  display={'flex'}
+                  justifyContent={'flex-end'}
+                  alignItems={'center'}
+                  gap={'10px'}
+                  marginTop={'20px'}
+                >
                   <LoadingButton
                     loading={isChangePasswordLoading}
                     loadingIndicator={'Loading...'}

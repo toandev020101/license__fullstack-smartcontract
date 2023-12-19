@@ -1,3 +1,4 @@
+import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Box,
   Button,
@@ -23,34 +24,34 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { BiEdit, BiSearchAlt, BiShowAlt, BiTrashAlt } from 'react-icons/bi';
 import { FiPlusSquare } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TitlePage from '../../../components/TitlePage';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { AuthContext } from '../../../contexts/authContext';
+import { WalletContext } from '../../../contexts/walletContext';
+import { toast } from 'react-toastify';
+import * as LicenseApi from '../../../apis/licenseApi';
+import Web3Api from '../../../web3Api';
 
 const LicenseManager = () => {
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedArr, setSelectedArr] = useState([]);
-  const rows = [
-    {
-      id: 1,
-      image: 'long',
-      description: '0123456',
-      authorName: '10',
-      hash: 'sjksdjhfhksjdjfjewiuruweyh',
-      createdAt: '14-12-2023',
-      //....
-    },
-  ]; // thêm dữ liệu ở đấy
+  const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteRowIndex, setDeleteRowIndex] = useState(-1);
-  const [searchTerm, setSearchTerm] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [reload, setReload] = useState(false);
+
+  const { isLogined, _setIsLogined } = useContext(AuthContext);
+  const { isConnected, _setIsConnected } = useContext(WalletContext);
+
   const headCells = [
     // các thành phần trên header
     {
@@ -63,11 +64,11 @@ const LicenseManager = () => {
       label: 'Hình ảnh',
       key: 'image',
       numeric: false,
-      width: 200,
+      width: 150,
     },
     {
-      label: 'Mô tả',
-      key: 'description',
+      label: 'Tên hình ảnh',
+      key: 'imageName',
       numeric: false,
       width: 250,
     },
@@ -81,13 +82,6 @@ const LicenseManager = () => {
       label: 'Mã băm',
       key: 'hash',
       numeric: false,
-      width: 200,
-    },
-    {
-      label: 'Ngày tạo',
-      key: 'createdAt',
-      numeric: false,
-      width: 180,
     },
     {
       label: 'Thao tác',
@@ -95,6 +89,54 @@ const LicenseManager = () => {
       width: 120,
     },
   ];
+
+  useEffect(() => {
+    // bỏ chọn nếu lấy lại danh sách rows
+    setSelectedArr([]);
+
+    const getPaginationLicense = async () => {
+      setIsLoading(true);
+      try {
+        const res = await LicenseApi.getPagination({
+          _limit: rowsPerPage,
+          _page: page,
+          searchTerm,
+        });
+
+        const { licenses, total } = res.metadata;
+        let newRows = licenses;
+
+        // lấy hash
+        const newWeb3Api = await Web3Api.getInstance();
+        if (newWeb3Api.contractInstance) {
+          const ids = licenses.map((license) => license.id);
+          const licenseArr = await newWeb3Api.contractInstance.methods.getLicenses(ids).call();
+          newRows = licenses.map((license, index) => {
+            return { ...license, hash: licenseArr[index].hash };
+          });
+        }
+
+        if (newRows.length === 0 && page > 0) {
+          setPage((prevPage) => prevPage - 1);
+        }
+        setRows(newRows);
+        setTotal(total);
+      } catch (error) {
+        const { data } = error.response;
+        if (data.code === 400 || data.code === 404) {
+          toast.error(data.message, { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+        } else if (data.code === 500) {
+          navigate('/error/500');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    if (isLogined) {
+      getPaginationLicense();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage, reload, isLogined, isConnected]);
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -144,11 +186,58 @@ const LicenseManager = () => {
     setOpenDeleteDialog(true);
   };
 
-  const handleDeleteRow = async () => {};
+  const handleDeleteRow = async () => {
+    setIsDeleteLoading(true);
+    try {
+      if (deleteRowIndex === -1) {
+        const success = await LicenseApi.removeAny({ ids: selectedArr });
+        if (success) {
+          const newWeb3Api = await Web3Api.getInstance();
+          if (newWeb3Api.contractInstance) {
+            const accounts = await newWeb3Api.web3Instance.eth.getAccounts();
+            await newWeb3Api.contractInstance.methods
+              .removeLicenses(selectedArr)
+              .send({ from: accounts[0] });
+          }
+        }
+      } else {
+        const success = await LicenseApi.removeOne(rows[deleteRowIndex].id);
+        if (success) {
+          const newWeb3Api = await Web3Api.getInstance();
+          if (newWeb3Api.contractInstance) {
+            const accounts = await newWeb3Api.web3Instance.eth.getAccounts();
+            await newWeb3Api.contractInstance.methods
+              .removeLicense(rows[deleteRowIndex].id)
+              .send({ from: accounts[0] });
+          }
+        }
+      }
+
+      toast.success('Xoá bản quyền thành công!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
+
+      setReload(!reload);
+      setSelectedArr([]);
+    } catch (error) {
+      const { data } = error.response;
+      if (data.code === 400 || data.code === 404) {
+        toast.error(data.message, { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      } else if (data.code === 500) {
+        navigate('/error/500');
+      }
+    }
+    setIsDeleteLoading(false);
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setPage(0);
+    setTimeout(() => {
+      setReload(!reload);
+      setPage(0);
+    }, 500);
   };
 
   return (
@@ -217,7 +306,7 @@ const LicenseManager = () => {
             )}
           </Box>
 
-          <Link to="/quan-tri/tai-khoan/danh-sach/them-moi">
+          <Link to="/quan-ly-ban-quyen/them-moi">
             <Button
               variant="contained"
               startIcon={<FiPlusSquare />}
@@ -255,9 +344,9 @@ const LicenseManager = () => {
                   />
                 </TableCell>
 
-                {headCells.map((headCell, index) => (
+                {headCells.map((headCell, id) => (
                   <TableCell
-                    key={`header-cell-${index}`}
+                    key={`header-cell-item-${id}`}
                     align={headCell.numeric ? 'right' : 'left'}
                     sx={{ fontSize: '14px' }}
                     width={headCell.width}
@@ -299,15 +388,15 @@ const LicenseManager = () => {
                         </TableCell>
 
                         {headCells.map((headCell, i) => (
-                          <>
+                          <Fragment key={`loading-item-${i}`}>
                             {headCell.key && headCell.key !== 'image' ? (
-                              <TableCell key={`loading-item-${i}`}>
+                              <TableCell>
                                 <Skeleton animation="wave" width="100%">
                                   <Typography>{headCell.label}</Typography>
                                 </Skeleton>
                               </TableCell>
                             ) : null}
-                          </>
+                          </Fragment>
                         ))}
 
                         <TableCell>
@@ -367,11 +456,16 @@ const LicenseManager = () => {
                         </TableCell>
                         {headCells.map((headCell, idx) => (
                           <>
-                            {headCell.key ? (
-                              <TableCell key={`rowItem-${idx}`} sx={{ fontSize: '14px' }}>
-                                {row[headCell.key] ? row[headCell.key] : '--'}
-                              </TableCell>
-                            ) : null}
+                            {headCell.key &&
+                              (headCell.key !== 'image' ? (
+                                <TableCell key={`rowItem-${idx}`} sx={{ fontSize: '14px' }}>
+                                  {row[headCell.key] ? row[headCell.key] : '--'}
+                                </TableCell>
+                              ) : (
+                                <TableCell key={`rowItem-${idx}`} sx={{ fontSize: '14px' }}>
+                                  <img width={'60px'} src={row[headCell.key]} alt="" />
+                                </TableCell>
+                              ))}
                           </>
                         ))}
                         <TableCell sx={{ fontSize: '14px' }}>
