@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Avatar, Box, Button, Divider, Typography, styled } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import InputField from '../../../components/form/InputField';
@@ -9,6 +9,7 @@ import * as UserApi from '../../../apis/userApi';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { AuthContext } from '../../../contexts/authContext';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -29,35 +30,15 @@ const Profile = () => {
   const [avatar, setAvatar] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const loginSuccess = async () => {
-      const userId = JWTManager.getUserId();
-      const res = await UserApi.getOneById(userId);
-      const user = res.metadata.user;
-      setUser(user);
-    };
+  const { isLogined, _setIsLogined } = useContext(AuthContext);
 
-    const isLogin = async () => {
+  useEffect(() => {
+    const getUser = async () => {
       try {
-        const token = JWTManager.getToken();
-        if (token) {
-          loginSuccess();
-        } else {
-          const success = await JWTManager.getRefreshToken();
-          if (success) {
-            loginSuccess();
-          } else {
-            navigate('/dang-nhap', {
-              state: {
-                notify: {
-                  type: 'error',
-                  message: 'Vui lòng đăng nhập !',
-                  options: { theme: 'colored', toastId: 'loginId', autoClose: 1500 },
-                },
-              },
-            });
-          }
-        }
+        const userId = JWTManager.getUserId();
+        const res = await UserApi.getOneById(userId);
+        const user = res.metadata.user;
+        setUser(user);
       } catch (error) {
         const { data } = error.response;
         if (data.code === 400 || data.code === 404) {
@@ -68,8 +49,10 @@ const Profile = () => {
       }
     };
 
-    isLogin();
-  }, [navigate]);
+    if (isLogined) {
+      getUser();
+    }
+  }, [navigate, isLogined]);
 
   useEffect(() => {
     if (user) {
@@ -132,7 +115,11 @@ const Profile = () => {
 
     try {
       await UserApi.updateOne(formData);
-      toast.success('Cập nhật tài khoản thành công!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      toast.success('Cập nhật tài khoản thành công!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
     } catch (error) {
       const { data } = error.response;
       if (data.code === 400 || data.code === 404) {
@@ -156,7 +143,9 @@ const Profile = () => {
     >
       {/* Header */}
       <Typography variant="h6">Hồ sơ của tôi</Typography>
-      <Typography sx={{ color: '#555', fontSize: '14px' }}>Quản lý thông tin hồ sơ để bảo mật tài khoản</Typography>
+      <Typography sx={{ color: '#555', fontSize: '14px' }}>
+        Quản lý thông tin hồ sơ để bảo mật tài khoản
+      </Typography>
       {/* Header */}
 
       <Divider sx={{ margin: '20px 0' }} />
@@ -166,7 +155,13 @@ const Profile = () => {
         <Box component={'form'} onSubmit={form.handleSubmit(handleSubmit)} width={'100%'}>
           <InputField name="username" label="Tên người dùng" size={'small'} form={form} disabled />
           <InputField name="fullName" label="Họ và tên" size={'small'} form={form} required />
-          <InputField name="phoneNumber" label="Số điện thoại" size={'small'} form={form} required />
+          <InputField
+            name="phoneNumber"
+            label="Số điện thoại"
+            size={'small'}
+            form={form}
+            required
+          />
           <InputField name="email" label="Email" size={'small'} form={form} />
           <InputField name="address" label="Địa chỉ" size={'small'} form={form} required />
 
@@ -196,7 +191,12 @@ const Profile = () => {
           justifyContent={'center'}
           alignItems={'center'}
           gap={'15px'}
-          sx={{ marginLeft: '30px', paddingLeft: '30px', borderLeft: '1px solid #e0e0e0', width: '800px' }}
+          sx={{
+            marginLeft: '30px',
+            paddingLeft: '30px',
+            borderLeft: '1px solid #e0e0e0',
+            width: '800px',
+          }}
         >
           <Avatar key={avatar} sx={{ width: '130px', height: '130px' }} alt="" src={avatar} />
           <Button component="label" variant="outlined" sx={{ textTransform: 'capitalize' }}>

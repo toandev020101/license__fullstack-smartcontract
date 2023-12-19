@@ -24,6 +24,7 @@ const App = () => {
       } catch (error) {
         const { data } = error.response;
         console.error(data);
+        setIsLogined(false);
       }
     };
 

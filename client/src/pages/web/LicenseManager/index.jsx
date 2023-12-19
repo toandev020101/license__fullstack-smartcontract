@@ -306,7 +306,7 @@ const LicenseManager = () => {
             )}
           </Box>
 
-          <Link to="/quan-tri/tai-khoan/danh-sach/them-moi">
+          <Link to="/quan-ly-ban-quyen/them-moi">
             <Button
               variant="contained"
               startIcon={<FiPlusSquare />}

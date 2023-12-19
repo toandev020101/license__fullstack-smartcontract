@@ -5,6 +5,24 @@ export const getPagination = ({ _limit, _page, searchTerm }) => {
   return axiosClient.get(url);
 };
 
+export const checkFile = (formData) => {
+  const url = '/licenses/file';
+  return axiosClient.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const addOne = (formData) => {
+  const url = '/licenses';
+  return axiosClient.post(url, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export const removeAny = (data) => {
   const url = '/licenses';
   return axiosClient.delete(url, { data });

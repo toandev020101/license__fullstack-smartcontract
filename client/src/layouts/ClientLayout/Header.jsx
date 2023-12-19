@@ -69,22 +69,10 @@ const Header = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        if (isLogined) {
-          const userId = JWTManager.getUserId();
-          const res = await UserApi.getOneById(userId);
-          const user = res.metadata.user;
-          setUser(user);
-        } else {
-          navigate('/dang-nhap', {
-            state: {
-              notify: {
-                type: 'error',
-                message: 'Vui lòng đăng nhập !',
-                options: { theme: 'colored', toastId: 'loginId', autoClose: 1500 },
-              },
-            },
-          });
-        }
+        const userId = JWTManager.getUserId();
+        const res = await UserApi.getOneById(userId);
+        const user = res.metadata.user;
+        setUser(user);
       } catch (error) {
         const { data } = error.response;
         if (data.code === 400 || data.code === 404) {
@@ -95,7 +83,25 @@ const Header = () => {
       }
     };
 
-    getUser();
+    let timeoutId;
+    if (isLogined) {
+      clearTimeout(timeoutId);
+      getUser();
+    } else {
+      timeoutId = setTimeout(
+        () =>
+          navigate('/dang-nhap', {
+            state: {
+              notify: {
+                type: 'error',
+                message: 'Vui lòng đăng nhập !',
+                options: { theme: 'colored', toastId: 'loginId', autoClose: 1500 },
+              },
+            },
+          }),
+        1000,
+      );
+    }
   }, [navigate, isLogined]);
 
   const handleConnectWallet = async () => {
@@ -104,7 +110,11 @@ const Header = () => {
     const newWeb3Api = await Web3Api.getInstance();
     let isConnect = await newWeb3Api.connect();
     if (!isConnect) {
-      toast.error('Kết nối metamask thất bại!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      toast.error('Kết nối metamask thất bại!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
       setIsConnectLoading(false);
       setIsConnected(false);
       return;
@@ -175,7 +185,11 @@ const Header = () => {
     setIsChangePasswordLoading(true);
     try {
       await UserApi.changePassword(values);
-      toast.success('Cập nhật mật khâu thành công!', { theme: 'colored', toastId: 'headerId', autoClose: 1500 });
+      toast.success('Cập nhật mật khâu thành công!', {
+        theme: 'colored',
+        toastId: 'headerId',
+        autoClose: 1500,
+      });
     } catch (error) {
       const { data } = error.response;
       if (data.code === 400 || data.code === 404) {
@@ -326,8 +340,22 @@ const Header = () => {
                 width={'100%'}
                 marginTop={'10px'}
               >
-                <InputField name="password" label="Mật khẩu cũ" size={'small'} type={'password'} form={form} fix />
-                <InputField name="newPassword" label="Mật khẩu mới" size={'small'} type={'password'} form={form} fix />
+                <InputField
+                  name="password"
+                  label="Mật khẩu cũ"
+                  size={'small'}
+                  type={'password'}
+                  form={form}
+                  fix
+                />
+                <InputField
+                  name="newPassword"
+                  label="Mật khẩu mới"
+                  size={'small'}
+                  type={'password'}
+                  form={form}
+                  fix
+                />
                 <InputField
                   name="confirmNewPassword"
                   label="Xác nhận mật khẩu mới"
@@ -337,7 +365,13 @@ const Header = () => {
                   fix
                 />
 
-                <Box display={'flex'} justifyContent={'flex-end'} alignItems={'center'} gap={'10px'} marginTop={'20px'}>
+                <Box
+                  display={'flex'}
+                  justifyContent={'flex-end'}
+                  alignItems={'center'}
+                  gap={'10px'}
+                  marginTop={'20px'}
+                >
                   <LoadingButton
                     loading={isChangePasswordLoading}
                     loadingIndicator={'Loading...'}
