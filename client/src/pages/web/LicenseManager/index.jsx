@@ -377,9 +377,11 @@ const LicenseManager = () => {
                         <TableCell sx={{ fontSize: '14px' }}>
                           <Box display="flex" gap="10px">
                             <Tooltip title="Chi tiết">
-                              <IconButton>
-                                <BiShowAlt style={{ color: '#40a6ce' }} />
-                              </IconButton>
+                              <Link to={`/quan-ly-ban-quyen/${row.id}`}>
+                                <IconButton>
+                                  <BiShowAlt style={{ color: '#40a6ce' }} />
+                                </IconButton>
+                              </Link>
                             </Tooltip>
 
                             <Tooltip title="Sửa">
