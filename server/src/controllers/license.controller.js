@@ -9,7 +9,7 @@ class LicenseController {
       metadata: await LicenseService.getPagination({ createdBy: req.userId, ...req.query }),
     }).send(res);
   };
-
+  
   checkFile = async (req, res, next) => {
     new OK({
       message: 'Check file OK!',
