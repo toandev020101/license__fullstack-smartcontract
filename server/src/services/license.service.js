@@ -38,6 +38,14 @@ class LicenseService {
     return { licenses, total };
   };
 
+  static getOneById = async ({ id }) => {
+    let findLicense = await db.License.findByPk(id);
+    if (!findLicense) {
+      throw new BadRequestError('Bản quyền không tồn tại !');
+    }
+    return { license: findLicense.get({ plain: true }) };
+  };
+
   static checkFile = async ({ file }) => {
     const filePath = path.join(__dirname, '../../uploads/' + file.filename);
 
@@ -73,6 +81,26 @@ class LicenseService {
 
     return {
       id: newLicense.id,
+      hash: hashed,
+    };
+  };
+
+  static updateOne = async ({ id, ...others }) => {
+    await db.License.update(others, { where: { id } });
+    let findLicense = await db.License.findByPk(id);
+    findLicense = findLicense.get({ plain: true });
+
+    // Tạo đối tượng hash
+    const hash = crypto.createHash('sha256');
+
+    // Cập nhật dữ liệu cần hash
+    hash.update(JSON.stringify(findLicense));
+
+    // Tính toán và lấy giá trị hash dưới dạng hex
+    const hashed = hash.digest('hex');
+
+    return {
+      id,
       hash: hashed,
     };
   };

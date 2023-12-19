@@ -7,20 +7,14 @@ contract contractApi{
         string hash;
     }
 
-    // struct History{
-    //     uint256 id;
-    //     string hash;
-    // }
-
     mapping (uint256 => License) licenses;
-    // mapping (uint256 => History) histories;
 
     License[] public licenseArr;
     address owner;
     uint256 public licenseAmount = 100000;
 
     constructor(){
-        owner = 0x9E06165d509D98b5A2b38f82435abD8E8Cb99C0e;
+        owner = msg.sender;
     }
 
     function getPayment() public view returns(address, uint256){
