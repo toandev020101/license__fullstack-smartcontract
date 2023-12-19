@@ -10,6 +10,13 @@ class LicenseController {
     }).send(res);
   };
 
+  getOneById = async (req, res, next) => {
+    new OK({
+      message: 'Get license OK!',
+      metadata: await LicenseService.getOneById(req.params),
+    }).send(res);
+  };
+
   checkFile = async (req, res, next) => {
     new OK({
       message: 'Check file OK!',
@@ -21,6 +28,13 @@ class LicenseController {
     new OK({
       message: 'Create license OK!',
       metadata: await LicenseService.addOne({ file: req.file, ...req.body }),
+    }).send(res);
+  };
+
+  updateOne = async (req, res, next) => {
+    new OK({
+      message: 'Update license OK!',
+      metadata: await LicenseService.updateOne(req.body),
     }).send(res);
   };
 

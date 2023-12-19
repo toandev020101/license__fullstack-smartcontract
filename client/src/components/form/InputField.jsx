@@ -5,13 +5,16 @@ import { BiHide, BiShowAlt } from 'react-icons/bi';
 
 const InputField = (props) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { form, name, label, required, type, fix, ...others } = props;
+  const { form, name, label, required, type, fix, readonly, ...others } = props;
 
   return (
     <Controller
       name={name}
       control={form.control}
-      render={({ field: { onChange, onBlur, value, name, ref }, fieldState: { invalid, error } }) => (
+      render={({
+        field: { onChange, onBlur, value, name, ref },
+        fieldState: { invalid, error },
+      }) => (
         <Box position="relative" width="100%">
           <TextField
             onBlur={onBlur} // notify when input is touched
@@ -20,6 +23,11 @@ const InputField = (props) => {
             label={`${label}${required ? ' *' : ''}`}
             value={value}
             inputRef={ref}
+            InputProps={
+              readonly && {
+                readOnly: true,
+              }
+            }
             fullWidth
             {...others}
             error={invalid}
