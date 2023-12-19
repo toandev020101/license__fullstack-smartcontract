@@ -10,6 +10,20 @@ class LicenseController {
     }).send(res);
   };
 
+  checkFile = async (req, res, next) => {
+    new OK({
+      message: 'Check file OK!',
+      metadata: await LicenseService.checkFile({ file: req.file }),
+    }).send(res);
+  };
+
+  addOne = async (req, res, next) => {
+    new OK({
+      message: 'Create license OK!',
+      metadata: await LicenseService.addOne({ file: req.file, ...req.body }),
+    }).send(res);
+  };
+
   removeOne = async (req, res, next) => {
     new OK({
       message: 'Delete license OK!',

@@ -2,6 +2,11 @@
 const { BadRequestError } = require('../core/error.response');
 const db = require('../models');
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
+const pinataSDK = require('@pinata/sdk');
+const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT });
+const crypto = require('node:crypto');
 
 class LicenseService {
   static getPagination = async ({ createdBy, _page, _limit, searchTerm }) => {
@@ -31,6 +36,45 @@ class LicenseService {
     const total = await db.License.count();
 
     return { licenses, total };
+  };
+
+  static checkFile = async ({ file }) => {
+    const filePath = path.join(__dirname, '../../uploads/' + file.filename);
+
+    const res = await pinata.pinFromFS(filePath);
+    fs.unlinkSync(filePath);
+    if (res.isDuplicate) {
+      throw new BadRequestError('Hình ảnh đã đăng ký bản quyền!');
+    }
+
+    await pinata.unpin(res.IpfsHash);
+    return true;
+  };
+
+  static addOne = async ({ file, ...others }) => {
+    const filePath = path.join(__dirname, '../../uploads/' + file.filename);
+
+    const res = await pinata.pinFromFS(filePath);
+    let newLicense = await db.License.create({
+      image: process.env.PINATA_GET_ENDPOINT + '/' + res.IpfsHash,
+      ...others,
+    });
+
+    newLicense = newLicense.get({ plain: true });
+
+    // Tạo đối tượng hash
+    const hash = crypto.createHash('sha256');
+
+    // Cập nhật dữ liệu cần hash
+    hash.update(JSON.stringify(newLicense));
+
+    // Tính toán và lấy giá trị hash dưới dạng hex
+    const hashed = hash.digest('hex');
+
+    return {
+      id: newLicense.id,
+      hash: hashed,
+    };
   };
 
   static removeOne = async ({ id }) => {
