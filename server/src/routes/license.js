@@ -12,4 +12,5 @@ router.get('', asyncHandler(licenseController.getPagination));
 router.delete('/:id', asyncHandler(licenseController.removeOne));
 router.delete('', asyncHandler(licenseController.removeAny));
 
+
 module.exports = router;
