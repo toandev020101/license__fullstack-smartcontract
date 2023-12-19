@@ -1,7 +1,7 @@
 'use strict';
 const { BadRequestError } = require('../core/error.response');
 const db = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 const pinataSDK = require('@pinata/sdk');
@@ -78,6 +78,14 @@ class LicenseService {
   };
 
   static removeOne = async ({ id }) => {
+    let findLicense = await db.License.findByPk(id);
+    if (!findLicense) {
+      throw new BadRequestError('Bản quyền không tồn tại !');
+    }
+    findLicense = findLicense.get({ plain: true });
+    const IpfsHash = findLicense.image.split(process.env.PINATA_GET_ENDPOINT + '/')[1];
+    await pinata.unpin(IpfsHash);
+
     const delCount = await db.License.destroy({
       where: {
         id,
@@ -87,10 +95,23 @@ class LicenseService {
     if (delCount === 0) {
       throw new BadRequestError('Bản quyền không tồn tại!');
     }
+
     return true;
   };
 
   static removeAny = async ({ ids }) => {
+    let result = await db.License.findAndCountAll({
+      where: {
+        id: ids,
+      },
+    });
+
+    const { _count, rows } = result;
+    rows.map(async (row) => {
+      const IpfsHash = row.dataValues.image.split(process.env.PINATA_GET_ENDPOINT + '/')[1];
+      await pinata.unpin(IpfsHash);
+    });
+
     const delCount = await db.License.destroy({
       where: {
         id: ids,
@@ -100,6 +121,7 @@ class LicenseService {
     if (delCount === 0) {
       throw new BadRequestError('Bản quyền không tồn tại!');
     }
+
     return true;
   };
 }
