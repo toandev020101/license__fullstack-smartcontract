@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import contractABI from './contracts/abi.json';
-const contractAddress = '0x4e3FA0916F729667bE85AeEd719f75A2AC6b1e65';
+const contractAddress = '0x87f59870361fB13dd40B484F4029037accC7baEE';
 
 class Web3Api {
   async connect() {

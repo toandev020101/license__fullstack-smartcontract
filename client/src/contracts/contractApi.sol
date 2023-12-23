@@ -7,9 +7,14 @@ contract contractApi{
         string hash;
     }
 
-    mapping (uint256 => License) licenses;
+    // struct History{
+    //     uint256 id;
+    //     string hash;
+    // }
 
-    License[] public licenseArr;
+    mapping (uint256 => License) licenses;
+    // mapping (uint256 => History) histories;
+
     address owner;
     uint256 public licenseAmount = 100000;
 
@@ -21,9 +26,11 @@ contract contractApi{
         return (owner, licenseAmount);
     }
 
-    function getLicenses(uint256[] memory _ids) public returns(License[] memory){
+    function getLicenses(uint256[] memory _ids) public view returns(License[] memory){
+        License[] memory licenseArr = new License[](_ids.length);
+
         for(uint256 i; i < _ids.length; i++){
-            licenseArr.push(licenses[_ids[i]]);
+            licenseArr[i] = licenses[_ids[i]];
         }
 
         return licenseArr;
